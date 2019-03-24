@@ -33,7 +33,7 @@ class Migration(migrations.Migration):
                 ('email', models.EmailField(error_messages={'unique': 'A user with this email already exists.'}, max_length=254, unique=True)),
                 ('phone_number', models.CharField(blank=True, max_length=17)),
                 ('is_client', models.BooleanField(default=True, help_text='Help easily distinguish users and perform queries.Clients are the main type of user.')),
-                ('is_verified', models.BooleanField(default=True, help_text='Set to true when the user have verified its email address.')),
+                ('is_verified', models.BooleanField(default=False, help_text='Set to true when the user have verified its email address.')),
                 ('groups', models.ManyToManyField(blank=True, help_text='The groups this user belongs to. A user will get all permissions granted to each of their groups.', related_name='user_set', related_query_name='user', to='auth.Group', verbose_name='groups')),
                 ('user_permissions', models.ManyToManyField(blank=True, help_text='Specific permissions for this user.', related_name='user_set', related_query_name='user', to='auth.Permission', verbose_name='user permissions')),
             ],

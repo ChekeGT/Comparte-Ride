@@ -1,4 +1,4 @@
-"""Users app models module."""
+"""User Model Declaration."""
 
 # Django
 from django.db import models
@@ -45,7 +45,7 @@ class User(CRideModel, AbstractUser):
     )
 
     is_verified = models.BooleanField(
-        default=True,
+        default=False,
         help_text='Set to true when the user have verified its email address.'
     )
 
