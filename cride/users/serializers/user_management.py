@@ -36,6 +36,9 @@ class UserLoginSerializer(serializers.Serializer):
         if not user:
             raise serializers.ValidationError('Invalid Credentials.')
 
+        if not user.is_verified:
+            raise serializers.ValidationError("This user is'nt verified yet.")
+
         self.context['user'] = user
         return data
 
@@ -130,6 +133,6 @@ class UserSignupSerializer(serializers.Serializer):
         """Creates user and profile when the data is validated."""
 
         user = User.objects.create(**validated_data)
-        profile = Profile.objects.create(user=user)
+        Profile.objects.create(user=user)
 
         return UserModelSerializer(user)
