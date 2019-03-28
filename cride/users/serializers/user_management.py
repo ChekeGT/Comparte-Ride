@@ -6,6 +6,8 @@ from rest_framework.authtoken.models import Token
 
 # Django
 from django.contrib.auth import authenticate, password_validation
+from django.template.loader import render_to_string
+from django.core.mail import EmailMultiAlternatives
 
 # Models
 from cride.users.models import User, Profile
@@ -13,6 +15,16 @@ from cride.users.models import User, Profile
 # Validators
 from rest_framework.validators import UniqueValidator
 from django.core.validators import RegexValidator
+
+# JWT
+import jwt
+
+# Utilities
+from datetime import timedelta
+from django.utils import timezone
+
+# Settings
+from django.conf import settings
 
 
 class UserLoginSerializer(serializers.Serializer):
@@ -135,4 +147,89 @@ class UserSignupSerializer(serializers.Serializer):
         user = User.objects.create(**validated_data)
         Profile.objects.create(user=user)
 
+        self.send_confirmation_email(user)
+
         return UserModelSerializer(user)
+
+    def send_confirmation_email(self, user):
+        """Send account verification email to a given user."""
+
+        verification_token = self.generate_verification_token(user)
+        subject = f'Welcome @{user.username}! Verify your account to start using Comparte Ride'
+        from_email = 'Comparte Ride <noreply@comparteride.com>'
+        content = render_to_string(
+            'emails/users/account_verification.html',
+            {
+                'token': verification_token,
+                'user': user
+            }
+        )
+        msg = EmailMultiAlternatives(subject, content, from_email, [user.email])
+        msg.attach_alternative(content, "text/html")
+        msg.send()
+
+    def generate_verification_token(self, user):
+        """Create JWT that the user can use to verify it's acount."""
+
+        expiration_date = timezone.now() + timedelta(days=3)
+
+        payload = {
+            'user': user.username,
+            'exp': expiration_date.timestamp(),
+            'type': 'email_confirmation'
+        }
+
+        # This could be a little bit confusing, why are we decoding this?
+        # Well, the function jwt.encode returns a byte object so to parse
+        # it to a string we need to use the method decode, but we are not
+        # decoding the JWT, just passing the byte object to str.
+        token = jwt.encode(payload, settings.SECRET_KEY, algorithm='HS256').decode()
+
+        return token
+
+
+class UserVerifySerializer(serializers.Serializer):
+    """Handles the data when a user is trying to verify it's account."""
+
+    token = serializers.CharField()
+
+    def validate_token(self, token):
+        """Verifies the token is valid."""
+
+        try:
+            payload = jwt.decode(token, settings.SECRET_KEY, algorithms=['HS256'])
+            type = payload['type']
+
+            if type != 'email_confirmation':
+                raise jwt.PyJWTError
+
+        except jwt.ExpiredSignatureError:
+            raise serializers.ValidationError('The validation time has expired.')
+
+        except jwt.PyJWTError:
+            raise serializers.ValidationError('Invalid token.')
+
+        else:
+
+            self.context['payload'] = payload
+
+            return token
+
+    def validate(self, data):
+        """Verifies the user have'nt verified it's account yet."""
+
+        payload = self.context['payload']
+        username = payload['user']
+
+        if User.objects.filter(username=username, is_verified=True).exists():
+            raise serializers.ValidationError('You have already verified your email.')
+
+    def save(self):
+        """Makes the field is_verified of the user True(Only if the token was valid)."""
+
+        payload = self.context['payload']
+        username = payload['user']
+
+        user = User.objects.get(username=username)
+        user.is_verified = True
+        user.save()

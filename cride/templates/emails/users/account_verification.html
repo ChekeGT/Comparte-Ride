@@ -1,0 +1,42 @@
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+
+<div class="container">
+  <hr>
+  <p id="message" class="alert-success" style="display:none"></p>
+
+	<p class='text alert-info'>
+	    Before you start using <b>Comparte Ride</b> we need you to do one last thing.
+	    Please click in thiss button and verify you are the owner of the account.
+	</p>
+
+	<button id='verify' class='btn btn-block btn-primary' data-token='{{ token }}'>Verificar correo</button>
+
+</div>
+
+<script type="text/javascript">
+
+	const button = document.getElementById('verify');
+	const token = button.attributes['data-token'].value;
+
+	button.addEventListener('click', async e => {
+		const url = `{% url 'users:verify' %}`;
+
+		const data = new FormData();
+		data.append('token', token);
+
+		const config = {
+		  method: 'POST',
+      body: data
+    };
+
+		response = await fetch(url, config);
+
+		json = await response.json();
+
+		if (response.status === 200){
+      message = document.getElementById('message');
+      message.style.display = 'block';
+      message.textContent = json['message'];
+    }
+	})
+</script>
