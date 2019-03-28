@@ -15,7 +15,6 @@ class Membership(CRideModel):
     """
 
     user = models.ForeignKey('users.User', on_delete=models.CASCADE)
-    profile = models.ForeignKey('users.Profile', on_delete=models.CASCADE)
     circle = models.ForeignKey('circles.Circle', on_delete=models.CASCADE)
 
     is_admin = models.BooleanField(
@@ -25,7 +24,7 @@ class Membership(CRideModel):
 
     # Invitations
     used_invitations = models.PositiveSmallIntegerField(default=0)
-    remaining_invitation = models.PositiveSmallIntegerField(default=0)
+    remaining_invitations = models.PositiveSmallIntegerField(default=0)
     invited_by = models.ForeignKey(
         'users.User',
         null=True,
