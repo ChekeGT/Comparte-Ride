@@ -161,7 +161,8 @@ class UserSignupSerializer(serializers.Serializer):
             'emails/users/account_verification.html',
             {
                 'token': verification_token,
-                'user': user
+                'user': user,
+                'dns': settings.ALLOWED_HOSTS[0]
             }
         )
         msg = EmailMultiAlternatives(subject, content, from_email, [user.email])
@@ -223,6 +224,8 @@ class UserVerifySerializer(serializers.Serializer):
 
         if User.objects.filter(username=username, is_verified=True).exists():
             raise serializers.ValidationError('You have already verified your email.')
+
+        return data
 
     def save(self):
         """Makes the field is_verified of the user True(Only if the token was valid)."""
