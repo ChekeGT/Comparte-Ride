@@ -3,10 +3,9 @@
 # Django REST Framework
 from rest_framework.viewsets import  ModelViewSet
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.authentication import TokenAuthentication
 
 # Models
-from cride.circles.models import Circle
+from cride.circles.models import Circle, Membership
 
 # Serializers
 from cride.circles.serializers import CircleModelSerializer
@@ -27,3 +26,15 @@ class CircleModelViewSet(ModelViewSet):
 
         return queryset
 
+    def perform_create(self, serializer):
+        """Ensures user is creating the Circle became in the admin of this."""
+
+        circle = serializer.save()
+        user = self.request.user
+
+        Membership.objects.create(
+            user=user,
+            circle=circle,
+            is_admin=True,
+            remaining_invitations=20
+        )
