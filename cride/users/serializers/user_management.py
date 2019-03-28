@@ -33,7 +33,6 @@ class UserLoginSerializer(serializers.Serializer):
     email = serializers.EmailField()
     password = serializers.CharField(min_length=8)
 
-
     def validate(self, data):
         """Checks credentials."""
 
@@ -144,7 +143,7 @@ class UserSignupSerializer(serializers.Serializer):
     def create(self, validated_data):
         """Creates user and profile when the data is validated."""
 
-        user = User.objects.create(**validated_data)
+        user = User.objects.create_user(**validated_data)
         Profile.objects.create(user=user)
 
         self.send_confirmation_email(user)
