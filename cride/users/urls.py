@@ -1,16 +1,19 @@
 """Users app urls configuration."""
 
 # Django
-from django.urls import path
+from django.urls import path, include
+
+# Django REST Framework
+from rest_framework.routers import DefaultRouter
 
 # Views
-from .views import UserLoginAPIView, UserSignupAPIView, UserVerifyAPIView
+from .views import UserManagementViewSet
 
+router = DefaultRouter()
+router.register(r'', UserManagementViewSet, base_name='users')
 
 app_name = 'Users'
 
 urlpatterns = [
-    path('login/', UserLoginAPIView.as_view(), name='login'),
-    path('signup/', UserSignupAPIView.as_view(), name='signup'),
-    path('verify/', UserVerifyAPIView.as_view(), name='verify'),
+    path('', include(router.urls))
 ]

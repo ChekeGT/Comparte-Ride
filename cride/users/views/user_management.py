@@ -1,12 +1,13 @@
 """File that contains the login view."""
 
 # Django REST Framework
-from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.status import (
     HTTP_200_OK,
     HTTP_201_CREATED
 )
+from rest_framework.viewsets import GenericViewSet
+from rest_framework.decorators import action
 
 # Serializers
 from cride.users.serializers import (
@@ -16,18 +17,13 @@ from cride.users.serializers import (
     UserVerifySerializer
 )
 
-# Django
-from django.shortcuts import  render
 
+class UserManagementViewSet(GenericViewSet):
+    """Manages all views related to the user model."""
 
-class UserLoginAPIView(APIView):
-    """Api view, manages the login of a user."""
-
-    def post(self, request):
-        """What to do when te method called is post.
-
-        Manages the login of a user.
-        """
+    @action(detail=False, methods=['post'])
+    def login(self, request):
+        """Manages the login of a user."""
 
         login = UserLoginSerializer(data=request.data)
 
@@ -39,16 +35,9 @@ class UserLoginAPIView(APIView):
             }
             return Response(response, status=HTTP_201_CREATED)
 
-
-
-class UserSignupAPIView(APIView):
-    """Api view, manages the signup of a user."""
-
-    def post(self, request):
-        """What to do when te method called is POST.
-
-        Manages the signup of a user.
-        """
+    @action(detail=False, methods=['post'])
+    def signup(self, request):
+        """ Manages the signup of a user."""
 
         signup = UserSignupSerializer(data=request.data)
 
@@ -58,11 +47,8 @@ class UserSignupAPIView(APIView):
 
             return Response(response, status=HTTP_201_CREATED)
 
-
-class UserVerifyAPIView(APIView):
-    """Api view, manages the verification of a user."""
-
-    def post(self, request):
+    @action(detail=False, methods=['post'])
+    def verify(self, request):
         """Manages the verification of a user."""
 
         serializer = UserVerifySerializer(data=request.data)
