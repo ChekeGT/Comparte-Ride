@@ -1,16 +1,24 @@
 """Circles app urls configuration and mapping"""
 
 # Django
-from django.urls import path
+from django.urls import path, include
+
+# Django REST Framework
+from rest_framework.routers import SimpleRouter
 
 # Views
-from .views import list_circles, create_circle
+from .views import CircleModelViewSet
 
 
 
 app_name = 'Circles'
 
+router = SimpleRouter()
+
+# I dont gave anything in the regex parameter because i
+# have already set it in the urls global file.
+router.register(r'', CircleModelViewSet, base_name='circles')
+
 urlpatterns = [
-    path('list/', list_circles, name='list'),
-    path('create/', create_circle, name='create')
+    path('', include(router.urls))
 ]
