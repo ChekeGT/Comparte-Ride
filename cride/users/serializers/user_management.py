@@ -26,6 +26,9 @@ from django.utils import timezone
 # Settings
 from django.conf import settings
 
+# Serializers
+from .profiles import ProfileModelSerializer
+
 
 class UserLoginSerializer(serializers.Serializer):
     """Handles and validate the data when a user tries to login."""
@@ -65,6 +68,8 @@ class UserLoginSerializer(serializers.Serializer):
 class UserModelSerializer(serializers.ModelSerializer):
     """Serializer of the user model."""
 
+    profile = ProfileModelSerializer(read_only=True)
+
     class Meta:
         """Metadata configurations."""
 
@@ -74,7 +79,8 @@ class UserModelSerializer(serializers.ModelSerializer):
             'first_name',
             'last_name',
             'email',
-            'phone_number'
+            'phone_number',
+            'profile'
         )
 
 

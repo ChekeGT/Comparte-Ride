@@ -4,3 +4,4 @@ from .user_management import (
     UserSignupSerializer,
     UserVerifySerializer
 )
+from .profiles import  ProfileModelSerializer
