@@ -7,7 +7,7 @@ from django.urls import path, include
 from rest_framework.routers import SimpleRouter
 
 # Views
-from .views import CircleModelViewSet
+from .views import CircleModelViewSet, MembershipViewSet
 
 
 
@@ -18,6 +18,12 @@ router = SimpleRouter()
 # I dont gave anything in the regex parameter because i
 # have already set it in the urls global file.
 router.register(r'', CircleModelViewSet, base_name='circles')
+
+router.register(
+    r'(?P<slug_name>[^/.]+)/members',
+    MembershipViewSet,
+    base_name='membership'
+)
 
 urlpatterns = [
     path('', include(router.urls))
