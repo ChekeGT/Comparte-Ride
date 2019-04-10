@@ -4,13 +4,19 @@
 from rest_framework.mixins import (
     ListModelMixin,
     RetrieveModelMixin,
-    DestroyModelMixin
+    DestroyModelMixin,
 )
 from rest_framework.viewsets import GenericViewSet
 from rest_framework.generics import get_object_or_404
+from rest_framework.decorators import action
+from rest_framework.response import Response
 
 # Models
-from cride.circles.models import Circle, Membership
+from cride.circles.models import (
+    Circle,
+    Membership,
+    Invitation
+)
 
 # Serializers
 from cride.circles.serializers import MembershipModelSerializer
@@ -19,7 +25,13 @@ from cride.circles.serializers import MembershipModelSerializer
 from rest_framework.permissions import IsAuthenticated
 from cride.circles.permissions import (
     IsCircleActiveMember,
-    IsAdminOrMembershipOwner
+    IsAdminOrMembershipOwner,
+    IsMembershipOwner
+)
+
+# Status
+from rest_framework.status import (
+    HTTP_200_OK
 )
 
 
@@ -50,6 +62,11 @@ class MembershipViewSet(
                 IsAdminOrMembershipOwner()
             )
 
+        if self.action == 'invitations':
+            permissions.append(
+                IsMembershipOwner()
+            )
+
         return permissions
 
     def get_queryset(self):
@@ -74,3 +91,44 @@ class MembershipViewSet(
         """Deactivates the membership and does'nt delete it."""
         instance.is_active = False
         instance.save()
+
+    @action(detail=True, methods=['get'])
+    def invitations(self, request, *args, **kwargs):
+        """Retrieve a member's invitation breakdown.
+
+        Will return a list containing all the members that have
+        used it's invitations and another list containing the
+        invitations that have'nt be used yet.
+        """
+
+        membership = self.get_object()
+
+        invited_members = Membership.objects.filter(
+            invited_by=request.user,
+            circle=self.circle,
+            is_active=True
+        )
+
+        for remaining_invitation in range(membership.remaining_invitations):
+            Invitation.objects.create(
+                issued_by=request.user,
+                circle=self.circle,
+            )
+
+        membership.remaining_invitations = 0
+        membership.save()
+
+        unused_invitations = [
+            x[0] for x in Invitation.objects.filter(
+                issued_by=request.user,
+                circle=self.circle,
+                used=False
+            ).values_list('code')
+        ]
+
+        data = {
+            'used_invitations': MembershipModelSerializer(invited_members, many=True).data,
+            'unused_invitations': unused_invitations
+        }
+
+        return Response(data=data, status=HTTP_200_OK)

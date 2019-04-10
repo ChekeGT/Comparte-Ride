@@ -56,3 +56,18 @@ class IsAdminOrMembershipOwner(BasePermission):
 
         else:
             return True
+
+
+class IsMembershipOwner(BasePermission):
+    """Allow only the membership owners to do some action."""
+
+    def has_permission(self, request, view):
+        """Let object permission grant access."""
+        obj = view.get_object()
+
+        return self.has_object_permission(request, view, obj)
+
+    def has_object_permission(self, request, view, obj):
+        """Determines if the request user is the membership owner."""
+
+        return request.user == obj.user
