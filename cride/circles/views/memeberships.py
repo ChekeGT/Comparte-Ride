@@ -5,6 +5,7 @@ from rest_framework.mixins import (
     ListModelMixin,
     RetrieveModelMixin,
     DestroyModelMixin,
+    CreateModelMixin
 )
 from rest_framework.viewsets import GenericViewSet
 from rest_framework.generics import get_object_or_404
@@ -19,7 +20,7 @@ from cride.circles.models import (
 )
 
 # Serializers
-from cride.circles.serializers import MembershipModelSerializer
+from cride.circles.serializers import MembershipModelSerializer, AddMemberSerializer
 
 # Permissions
 from rest_framework.permissions import IsAuthenticated
@@ -31,15 +32,18 @@ from cride.circles.permissions import (
 
 # Status
 from rest_framework.status import (
-    HTTP_200_OK
+    HTTP_200_OK,
+    HTTP_201_CREATED
 )
 
 
 class MembershipViewSet(
     ListModelMixin,
     GenericViewSet,
+    CreateModelMixin,
     RetrieveModelMixin,
-    DestroyModelMixin):
+    DestroyModelMixin
+):
     """"Circle Membership View Set."""
 
     serializer_class = MembershipModelSerializer
@@ -132,3 +136,22 @@ class MembershipViewSet(
         }
 
         return Response(data=data, status=HTTP_200_OK)
+
+    def create(self, request, *args, **kwargs):
+        """Handle member creation from invitation code."""
+
+        serializer = AddMemberSerializer(
+            data=request.data,
+            context={
+                'circle': self.circle,
+                'request': request
+            }
+        )
+
+        if serializer.is_valid(raise_exception=True):
+
+            member = serializer.save()
+
+            data = self.get_serializer(member).data
+
+            return Response(data=data, status=HTTP_201_CREATED)

@@ -1,2 +1,2 @@
 from .circles import CircleModelSerializer
-from .memberships import MembershipModelSerializer
+from .memberships import MembershipModelSerializer, AddMemberSerializer
