@@ -13,6 +13,9 @@ urlpatterns = [
     path('circles/', include('cride.circles.urls', namespace='circles',)),
 
     # Users App
-    path('users/', include('cride.users.urls', namespace='users'))
+    path('users/', include('cride.users.urls', namespace='users')),
+
+    # Rides app
+    path('rides/', include('cride.rides.urls', namespace='rides'))
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
