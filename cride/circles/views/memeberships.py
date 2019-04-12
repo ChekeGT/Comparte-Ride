@@ -1,16 +1,18 @@
 """Membership model related views."""
 
 # Django REST Framework
+from rest_framework.generics import get_object_or_404
+from rest_framework.decorators import action
+from rest_framework.response import Response
+
+# Mixins
 from rest_framework.mixins import (
     ListModelMixin,
     RetrieveModelMixin,
     DestroyModelMixin,
     CreateModelMixin
 )
-from rest_framework.viewsets import GenericViewSet
-from rest_framework.generics import get_object_or_404
-from rest_framework.decorators import action
-from rest_framework.response import Response
+from cride.utils.mixins import AddCircleMixin
 
 # Models
 from cride.circles.models import (
@@ -39,7 +41,7 @@ from rest_framework.status import (
 
 class MembershipViewSet(
     ListModelMixin,
-    GenericViewSet,
+    AddCircleMixin,
     CreateModelMixin,
     RetrieveModelMixin,
     DestroyModelMixin
@@ -48,13 +50,6 @@ class MembershipViewSet(
 
     serializer_class = MembershipModelSerializer
     lookup_field = 'username'
-
-    def dispatch(self, request, *args, **kwargs):
-        """Return the normal dispatch but adds the circle model."""
-        slug_name = kwargs['slug_name']
-        self.circle = get_object_or_404(Circle, slug_name=slug_name)
-
-        return super(MembershipViewSet, self).dispatch(request, *args, **kwargs)
 
     def get_permissions(self):
         """Modifies the default permission classes."""
