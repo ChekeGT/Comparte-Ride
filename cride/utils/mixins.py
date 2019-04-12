@@ -6,8 +6,8 @@ from rest_framework.viewsets import GenericViewSet
 # Models
 from cride.circles.models import Circle
 
-# Django
-from django.shortcuts import get_object_or_404
+# Django REST Framework
+from rest_framework.generics import get_object_or_404
 
 
 class AddCircleMixin(GenericViewSet):
