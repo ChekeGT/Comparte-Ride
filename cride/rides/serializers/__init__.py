@@ -1,3 +1,4 @@
 from .rides import (
-    CreateRideSerializer
+    CreateRideSerializer,
+    RideModelSerializer
 )

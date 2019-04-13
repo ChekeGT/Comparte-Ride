@@ -12,6 +12,22 @@ from django.utils import timezone
 from datetime import timedelta
 
 
+class RideModelSerializer(serializers.ModelSerializer):
+    """Ride Model Serializer."""
+
+    class Meta:
+        """Metadata class."""
+
+        model = Ride
+
+        fields = '__all__'
+
+        read_only_fields = (
+            'rating', 'offered_by',
+            'offered_in'
+        )
+
+
 class CreateRideSerializer(serializers.ModelSerializer):
 
     offered_by = serializers.HiddenField(
