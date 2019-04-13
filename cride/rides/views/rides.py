@@ -63,6 +63,10 @@ class RideViewSet(
 
         context['circle'] = self.circle
 
+        if self.action == 'join':
+            context['ride'] = self.get_object()
+            context['circle'] = self.circle
+
         return context
 
     def get_serializer_class(self):
@@ -71,13 +75,16 @@ class RideViewSet(
         if self.action == 'create':
             return CreateRideSerializer
 
+        if self.action == 'join':
+            return JoinRideSerializer
+
         return RideModelSerializer
 
     def get_queryset(self):
         """Manages getting the queryset."""
 
         circle = self.circle
-        offset = timezone.now() + timedelta(minutes=30)
+        offset = timezone.now() + timedelta(minutes=10)
 
         queryset = circle.ride_set.filter(
             available_seats__gte=1,
@@ -111,17 +118,14 @@ class RideViewSet(
         """Handles joining to a circle."""
 
         ride = self.get_object()
-        circle = self.circle
 
-        serializer = JoinRideSerializer(
+        serializer_class = self.get_serializer_class()
+        serializer = serializer_class(
             ride,
             data={
                 'passenger': request.user.pk
             },
-            context={
-                'ride': ride,
-                'circle': circle
-            },
+            context=self.get_serializer_context(),
             partial=True
         )
 
@@ -131,3 +135,4 @@ class RideViewSet(
 
             return Response(data=data, status=HTTP_200_OK)
 
+    

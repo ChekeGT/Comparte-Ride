@@ -174,7 +174,7 @@ class JoinRideSerializer(serializers.ModelSerializer):
         """Handles validating the ride is accessible"""
 
         ride = self.context['ride']
-        offset = timezone.now() + timedelta(minutes=30)
+        offset = timezone.now() + timedelta(minutes=10)
         user = self.context['user']
 
         if ride.departure_date <= offset:
