@@ -11,9 +11,17 @@ from cride.circles.models import Membership
 from django.utils import timezone
 from datetime import timedelta
 
+# Serializers
+from cride.users.serializers import UserModelSerializer
+
 
 class RideModelSerializer(serializers.ModelSerializer):
     """Ride Model Serializer."""
+
+    offered_by = UserModelSerializer(read_only=True)
+    offered_in = serializers.StringRelatedField(read_only=True)
+
+    passengers = UserModelSerializer(read_only=True, many=True)
 
     class Meta:
         """Metadata class."""
@@ -26,6 +34,16 @@ class RideModelSerializer(serializers.ModelSerializer):
             'rating', 'offered_by',
             'offered_in'
         )
+
+    def update(self, instance, validated_data):
+        """Handles validate the update is valid yet."""
+
+        now = timezone.now()
+
+        if instance.departure_date <= now:
+            raise serializers.ValidationError('On going rides can not be updated.')
+        
+        return super(RideModelSerializer, self).update(instance, validated_data)
 
 
 class CreateRideSerializer(serializers.ModelSerializer):

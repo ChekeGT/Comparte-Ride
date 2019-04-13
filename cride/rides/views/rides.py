@@ -6,12 +6,14 @@
 from rest_framework.mixins import (
     CreateModelMixin,
     ListModelMixin,
+    UpdateModelMixin
 )
 from cride.utils.mixins import AddCircleMixin
 
 # Permissions
 from rest_framework.permissions import IsAuthenticated
 from cride.circles.permissions import IsCircleActiveMember
+from cride.rides.permissions import IsRideOwner
 
 # Serializers
 from cride.rides.serializers import (
@@ -31,13 +33,9 @@ class RideViewSet(
     AddCircleMixin,
     ListModelMixin,
     CreateModelMixin,
+    UpdateModelMixin
 ):
-    """Pending docs."""
-
-    permission_classes = [
-        IsAuthenticated,
-        IsCircleActiveMember,
-    ]
+    """Manages CRUD of Ride model."""
 
     filter_backends = (SearchFilter, OrderingFilter)
 
@@ -76,3 +74,18 @@ class RideViewSet(
         )
 
         return queryset
+
+    def get_permissions(self):
+        """Returns permissions based on action."""
+
+        permissions = [
+            IsAuthenticated(),
+            IsCircleActiveMember(),
+        ]
+
+        if self.action in ['update', 'partial_update']:
+            permissions.append(
+                IsRideOwner()
+            )
+
+        return permissions
