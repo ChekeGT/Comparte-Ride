@@ -1,3 +1,4 @@
 from .rides import (
-    IsRideOwner
+    IsRideOwner,
+    IsNotRideOwner
 )

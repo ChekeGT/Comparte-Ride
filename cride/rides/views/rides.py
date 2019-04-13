@@ -1,6 +1,8 @@
 """Ride Model Related views."""
 
 # Django REST Framework
+from rest_framework.decorators import action
+from rest_framework.response import Response
 
 # Mixins
 from rest_framework.mixins import (
@@ -13,12 +15,16 @@ from cride.utils.mixins import AddCircleMixin
 # Permissions
 from rest_framework.permissions import IsAuthenticated
 from cride.circles.permissions import IsCircleActiveMember
-from cride.rides.permissions import IsRideOwner
+from cride.rides.permissions import (
+    IsRideOwner,
+    IsNotRideOwner
+)
 
 # Serializers
 from cride.rides.serializers import (
     CreateRideSerializer,
-    RideModelSerializer
+    RideModelSerializer,
+    JoinRideSerializer
 )
 
 # Utilities
@@ -27,6 +33,11 @@ from datetime import timedelta
 
 # Filters
 from rest_framework.filters import SearchFilter, OrderingFilter
+
+# Status
+from rest_framework.status import (
+    HTTP_200_OK
+)
 
 
 class RideViewSet(
@@ -88,4 +99,35 @@ class RideViewSet(
                 IsRideOwner()
             )
 
+        if self.action == 'join':
+            permissions.append(
+                IsNotRideOwner()
+            )
+
         return permissions
+
+    @action(detail=True, methods=['post'])
+    def join(self, request, *args, **kwargs):
+        """Handles joining to a circle."""
+
+        ride = self.get_object()
+        circle = self.circle
+
+        serializer = JoinRideSerializer(
+            ride,
+            data={
+                'passenger': request.user.pk
+            },
+            context={
+                'ride': ride,
+                'circle': circle
+            },
+            partial=True
+        )
+
+        if serializer.is_valid(raise_exception=True):
+            ride = serializer.save()
+            data = RideModelSerializer(ride).data
+
+            return Response(data=data, status=HTTP_200_OK)
+
