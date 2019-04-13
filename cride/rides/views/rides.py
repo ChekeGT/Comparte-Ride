@@ -24,7 +24,8 @@ from cride.rides.permissions import (
 from cride.rides.serializers import (
     CreateRideSerializer,
     RideModelSerializer,
-    JoinRideSerializer
+    JoinRideSerializer,
+    EndRideSerializer
 )
 
 # Utilities
@@ -58,14 +59,13 @@ class RideViewSet(
 
     def get_serializer_context(self):
         """Modifies the serializer context adding the current circle to the context."""
-        
+
         context = super(RideViewSet, self).get_serializer_context()
 
         context['circle'] = self.circle
 
-        if self.action == 'join':
+        if self.action in ['join', 'finish']:
             context['ride'] = self.get_object()
-            context['circle'] = self.circle
 
         return context
 
@@ -78,18 +78,25 @@ class RideViewSet(
         if self.action == 'join':
             return JoinRideSerializer
 
+        if self.action == 'finish':
+            return EndRideSerializer
+
         return RideModelSerializer
 
     def get_queryset(self):
         """Manages getting the queryset."""
 
         circle = self.circle
-        offset = timezone.now() + timedelta(minutes=10)
 
-        queryset = circle.ride_set.filter(
-            available_seats__gte=1,
-            departure_date__gte=offset
-        )
+        if self.action != 'finish':
+            offset = timezone.now() + timedelta(minutes=10)
+
+            queryset = circle.ride_set.filter(
+                available_seats__gte=1,
+                departure_date__gte=offset
+            )
+        else:
+            queryset = circle.ride_set.all()
 
         return queryset
 
@@ -101,7 +108,7 @@ class RideViewSet(
             IsCircleActiveMember(),
         ]
 
-        if self.action in ['update', 'partial_update']:
+        if self.action in ['update', 'partial_update', 'finish']:
             permissions.append(
                 IsRideOwner()
             )
@@ -135,4 +142,27 @@ class RideViewSet(
 
             return Response(data=data, status=HTTP_200_OK)
 
-    
+    @action(detail=True, methods=['post'])
+    def finish(self, request, *args, **kwargs):
+        """Handles finishing a ride."""
+
+        ride = self.get_object()
+
+        serializer_class = self.get_serializer_class()
+        serializer = serializer_class(
+            ride,
+            data={
+                'is_active': False,
+                'current_time': timezone.now()
+            },
+            context=self.get_serializer_context(),
+            partial=True
+        )
+
+        if serializer.is_valid(raise_exception=True):
+            ride = serializer.save()
+
+            data = RideModelSerializer(ride).data
+
+            return Response(data=data, status=HTTP_200_OK)
+

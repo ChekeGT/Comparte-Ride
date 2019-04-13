@@ -1,3 +1,4 @@
+
 """Rides Model Related Serializers."""
 
 # Django REST Framework
@@ -43,7 +44,7 @@ class RideModelSerializer(serializers.ModelSerializer):
 
         if instance.departure_date <= now:
             raise serializers.ValidationError('On going rides can not be updated.')
-        
+
         return super(RideModelSerializer, self).update(instance, validated_data)
 
 
@@ -186,6 +187,9 @@ class JoinRideSerializer(serializers.ModelSerializer):
         if ride.available_seats < 1:
             raise serializers.ValidationError('This ride has not available seats.')
 
+        if ride.is_active == False:
+            raise serializers.ValidationError('This ride has already ended.')
+
         if user == ride.offered_by:
             raise serializers.ValidationError('You  are the ride creator.')
 
@@ -221,3 +225,25 @@ class JoinRideSerializer(serializers.ModelSerializer):
         membership.save()
 
         return ride
+
+
+class EndRideSerializer(serializers.ModelSerializer):
+    """Handles finishing a ride and validating that action."""
+
+    current_time = serializers.DateTimeField()
+
+    class Meta:
+        """Metadata class."""
+
+        model = Ride
+        fields = ('is_active', 'current_time')
+
+    def validate_current_time(self, current_time):
+        """Handles validating that the current time is'nt before the ride"""
+
+        ride = self.context['ride']
+
+        if current_time < ride.departure_date:
+            raise serializers.ValidationError("The ride have'nt started yet.")
+
+        return current_time
