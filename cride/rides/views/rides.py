@@ -25,7 +25,8 @@ from cride.rides.serializers import (
     CreateRideSerializer,
     RideModelSerializer,
     JoinRideSerializer,
-    EndRideSerializer
+    EndRideSerializer,
+    QualifyRideSerializer
 )
 
 # Utilities
@@ -64,7 +65,7 @@ class RideViewSet(
 
         context['circle'] = self.circle
 
-        if self.action in ['join', 'finish']:
+        if self.action in ['join', 'finish', 'qualify']:
             context['ride'] = self.get_object()
 
         return context
@@ -81,6 +82,9 @@ class RideViewSet(
         if self.action == 'finish':
             return EndRideSerializer
 
+        if self.action == 'qualify':
+            return QualifyRideSerializer
+
         return RideModelSerializer
 
     def get_queryset(self):
@@ -88,7 +92,7 @@ class RideViewSet(
 
         circle = self.circle
 
-        if self.action != 'finish':
+        if not self.action in ['finish', 'qualify']:
             offset = timezone.now() + timedelta(minutes=10)
 
             queryset = circle.ride_set.filter(
@@ -113,7 +117,7 @@ class RideViewSet(
                 IsRideOwner()
             )
 
-        if self.action == 'join':
+        if self.action in ['join', 'qualify']:
             permissions.append(
                 IsNotRideOwner()
             )
@@ -157,6 +161,23 @@ class RideViewSet(
             },
             context=self.get_serializer_context(),
             partial=True
+        )
+
+        if serializer.is_valid(raise_exception=True):
+            ride = serializer.save()
+
+            data = RideModelSerializer(ride).data
+
+            return Response(data=data, status=HTTP_200_OK)
+
+    @action(detail=True, methods=['post'])
+    def qualify(self, request, *args, **kwargs):
+        """Manages giving qualification to a ride"""
+
+        serializer_class = self.get_serializer_class()
+        serializer = serializer_class(
+            data=request.data,
+            context=self.get_serializer_context(),
         )
 
         if serializer.is_valid(raise_exception=True):

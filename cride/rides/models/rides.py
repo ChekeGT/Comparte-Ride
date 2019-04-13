@@ -5,6 +5,7 @@ from django.db import models
 
 # Utilities
 from cride.utils.models import CRideModel
+from .qualifications import Qualification
 
 
 class Ride(CRideModel):
@@ -23,7 +24,7 @@ class Ride(CRideModel):
     arrival_location = models.CharField(max_length=255)
     arrival_date = models.DateTimeField()
 
-    rating = models.FloatField(null=True)
+    rating = models.ManyToManyField(Qualification, related_name='rating')
 
     is_active = models.BooleanField(
         'active status',

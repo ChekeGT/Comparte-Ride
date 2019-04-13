@@ -2,5 +2,10 @@ from .rides import (
     CreateRideSerializer,
     RideModelSerializer,
     JoinRideSerializer,
-    EndRideSerializer
+    EndRideSerializer,
+    QualifyRideSerializer
+)
+
+from .qualifications import (
+    QualificationModelSerializer
 )

@@ -5,16 +5,21 @@
 from rest_framework import serializers
 
 # Models
-from cride.rides.models import Ride
+from cride.rides.models import (
+    Ride,
+    Qualification
+)
 from cride.circles.models import Membership
 from cride.users.models import User
 
 # Utilities
 from django.utils import timezone
 from datetime import timedelta
+from statistics import mean
 
 # Serializers
 from cride.users.serializers import UserModelSerializer
+from .qualifications import QualificationModelSerializer
 
 
 class RideModelSerializer(serializers.ModelSerializer):
@@ -24,6 +29,8 @@ class RideModelSerializer(serializers.ModelSerializer):
     offered_in = serializers.StringRelatedField(read_only=True)
 
     passengers = UserModelSerializer(read_only=True, many=True)
+
+    rating = QualificationModelSerializer(read_only=True, many=True)
 
     class Meta:
         """Metadata class."""
@@ -226,6 +233,20 @@ class JoinRideSerializer(serializers.ModelSerializer):
 
         return ride
 
+    def save(self, **kwargs):
+        """Creates a qualification, and returns the base functionality."""
+
+        user = self.context['user']
+        ride = self.context['ride']
+
+        qualification = Qualification.objects.create(
+            user=user
+        )
+
+        ride.rating.add(qualification)
+
+        return super(JoinRideSerializer, self).save(**kwargs)
+
 
 class EndRideSerializer(serializers.ModelSerializer):
     """Handles finishing a ride and validating that action."""
@@ -247,3 +268,72 @@ class EndRideSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("The ride have'nt started yet.")
 
         return current_time
+
+
+class QualifyRideSerializer(serializers.Serializer):
+
+    qualification = serializers.FloatField()
+    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+
+    def validate_user(self, user):
+        """Validate that:
+
+        The user has not already given a rating
+        The user is part of the ride
+        """
+
+        ride = self.context['ride']
+
+        rating_set = ride.rating.all()
+
+        user_rating = rating_set.get(user=user)
+
+        rating_query = rating_set.filter(
+            user=user,
+            score__gt=0
+        )
+
+        if not user in ride.passengers.all():
+            raise serializers.ValidationError('You are not in the ride.')
+
+        if rating_query.exists():
+            raise serializers.ValidationError('You already give a qualification to this ride.')
+
+        self.context['rating'] = user_rating
+
+        return user
+
+    def validate_qualification(self, qualification):
+        """Validates then qualification is greater then 0"""
+
+        if qualification < 0:
+            raise serializers.ValidationError('Qualification must be at least 0')
+
+        if qualification > 5 or qualification  < 0:
+            raise serializers.ValidationError('Qualification must be between 0 and 5')
+
+        return qualification
+
+    def validate(self, data):
+        """Validates ride related things."""
+
+        ride = self.context['ride']
+
+        if ride.is_active:
+            raise serializers.ValidationError("You could'nt qualify this ride until it did'nt ends.")
+
+        return data
+
+    def save(self, **kwargs):
+        """Handles saving the ride."""
+
+        rating = self.context['rating']
+
+        rating.score = self.validated_data['qualification']
+
+        rating.save()
+
+        ride = self.context['ride']
+
+
+        return ride
