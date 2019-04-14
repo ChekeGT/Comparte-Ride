@@ -9,7 +9,7 @@ from cride.users.serializers import UserModelSerializer
 # Models
 from cride.circles.models import Membership, Invitation
 
-# Utilites
+# Utilities
 from django.utils import timezone
 
 
@@ -18,7 +18,7 @@ class MembershipModelSerializer(serializers.ModelSerializer):
 
     joined_at = serializers.DateTimeField(source='created', read_only=True)
 
-    user =  UserModelSerializer(read_only=True)
+    user = UserModelSerializer(read_only=True)
     invited_by = serializers.StringRelatedField(read_only=True)
 
     class Meta:

@@ -23,7 +23,7 @@ class User(CRideModel, AbstractUser):
         }
     )
 
-    USERNAME_FIELD =  'email'
+    USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username', 'first_name', 'last_name']
 
     PHONE_REGEX_VALIDATOR = RegexValidator(

@@ -28,4 +28,3 @@ class CRideModel(models.Model):
 
         abstract = True
         ordering = ['-created', '-modified']
-

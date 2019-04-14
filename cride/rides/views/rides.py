@@ -92,7 +92,7 @@ class RideViewSet(
 
         circle = self.circle
 
-        if not self.action in ['finish', 'qualify']:
+        if self.action not in ['finish', 'qualify']:
             offset = timezone.now() + timedelta(minutes=10)
 
             queryset = circle.ride_set.filter(
@@ -186,4 +186,3 @@ class RideViewSet(
             data = RideModelSerializer(ride).data
 
             return Response(data=data, status=HTTP_200_OK)
-

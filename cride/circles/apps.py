@@ -3,6 +3,7 @@
 # Django
 from django.apps import AppConfig
 
+
 class CirclesConfig(AppConfig):
     """CirclesConfig class that inherits from AppConfig.
 

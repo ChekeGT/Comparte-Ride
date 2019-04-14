@@ -1,11 +1,11 @@
 """Circles Model related views."""
 
 # Django REST Framework
-from rest_framework.viewsets import  GenericViewSet
+from rest_framework.viewsets import GenericViewSet
 
 # Permissions
 from rest_framework.permissions import IsAuthenticated
-from cride.circles.permissions import  IsCircleAdmin
+from cride.circles.permissions import IsCircleAdmin
 
 # Mixins
 from rest_framework.mixins import (
@@ -22,7 +22,7 @@ from cride.circles.models import Circle, Membership
 from cride.circles.serializers import CircleModelSerializer
 
 # Filters
-from rest_framework.filters import  SearchFilter, OrderingFilter
+from rest_framework.filters import SearchFilter, OrderingFilter
 from django_filters.rest_framework import DjangoFilterBackend
 
 
@@ -50,7 +50,7 @@ class CircleModelViewSet(CreateModelMixin, RetrieveModelMixin, UpdateModelMixin,
         return queryset
 
     def get_permissions(self):
-        permission_classes = [IsAuthenticated(),]
+        permission_classes = [IsAuthenticated(), ]
 
         if self.action in ['update', 'partial_update']:
             permission_classes.append(IsCircleAdmin())

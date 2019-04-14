@@ -39,8 +39,8 @@ class CircleModelSerializer(serializers.ModelSerializer):
         model = Circle
 
         fields = (
-            'name','slug_name','about','picture','rides_offered',
-            'rides_taken','is_verified','is_public','is_limited','members_limit'
+            'name', 'slug_name', 'about', 'picture', 'rides_offered',
+            'rides_taken', 'is_verified', 'is_public', 'is_limited', 'members_limit'
         )
 
         read_only_fields = (

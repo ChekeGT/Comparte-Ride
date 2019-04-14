@@ -46,5 +46,4 @@ class Membership(CRideModel):
         """Return username and circle."""
         return '@{} at #{}'.format(
             self.user.username,
-            self.circle.slug_name
-)
+            self.circle.slug_name)

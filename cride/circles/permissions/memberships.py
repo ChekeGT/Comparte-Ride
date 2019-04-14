@@ -4,7 +4,7 @@
 from rest_framework.permissions import BasePermission
 
 # Models
-from  cride.circles.models import Membership
+from cride.circles.models import Membership
 
 
 class IsCircleActiveMember(BasePermission):
@@ -45,12 +45,12 @@ class IsAdminOrMembershipOwner(BasePermission):
             return True
 
         try:
-           Membership.objects.get(
-               user=request.user,
-               circle=view.circle,
-               is_active=True,
-               is_admin=True
-           )
+            Membership.objects.get(
+                user=request.user,
+                circle=view.circle,
+                is_active=True,
+                is_admin=True
+            )
         except Membership.DoesNotExist:
             return False
 

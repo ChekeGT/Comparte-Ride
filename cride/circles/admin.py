@@ -21,7 +21,7 @@ class CircleAdmin(admin.ModelAdmin):
         'members_limit'
     ]
 
-    search_fields =  [
+    search_fields = [
         'slug_name',
         'name'
     ]

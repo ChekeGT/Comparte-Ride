@@ -3,6 +3,7 @@
 # Django
 from django.apps import AppConfig
 
+
 class UsersConfig(AppConfig):
     """UserConfig class that inherits from AppConfig.
 

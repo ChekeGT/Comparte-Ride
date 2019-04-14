@@ -10,7 +10,7 @@ from rest_framework.viewsets import GenericViewSet
 from rest_framework.decorators import action
 
 # Mixins
-from rest_framework.mixins import  RetrieveModelMixin, UpdateModelMixin
+from rest_framework.mixins import RetrieveModelMixin, UpdateModelMixin
 
 # Serializers
 from cride.users.serializers import (

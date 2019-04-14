@@ -15,7 +15,6 @@ from cride.users.models import User
 # Utilities
 from django.utils import timezone
 from datetime import timedelta
-from statistics import mean
 
 # Serializers
 from cride.users.serializers import UserModelSerializer
@@ -194,7 +193,7 @@ class JoinRideSerializer(serializers.ModelSerializer):
         if ride.available_seats < 1:
             raise serializers.ValidationError('This ride has not available seats.')
 
-        if ride.is_active == False:
+        if not ride.is_active:
             raise serializers.ValidationError('This ride has already ended.')
 
         if user == ride.offered_by:
@@ -293,7 +292,7 @@ class QualifyRideSerializer(serializers.Serializer):
             score__gt=0
         )
 
-        if not user in ride.passengers.all():
+        if user not in ride.passengers.all():
             raise serializers.ValidationError('You are not in the ride.')
 
         if rating_query.exists():
@@ -309,7 +308,7 @@ class QualifyRideSerializer(serializers.Serializer):
         if qualification < 0:
             raise serializers.ValidationError('Qualification must be at least 0')
 
-        if qualification > 5 or qualification  < 0:
+        if qualification > 5 or qualification < 0:
             raise serializers.ValidationError('Qualification must be between 0 and 5')
 
         return qualification
@@ -334,6 +333,5 @@ class QualifyRideSerializer(serializers.Serializer):
         rating.save()
 
         ride = self.context['ride']
-
 
         return ride

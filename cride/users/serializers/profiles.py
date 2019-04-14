@@ -27,4 +27,3 @@ class ProfileModelSerializer(serializers.ModelSerializer):
             'rides_offered',
             'reputation'
         )
-

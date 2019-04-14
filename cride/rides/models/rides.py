@@ -40,4 +40,4 @@ class Ride(CRideModel):
             day=self.departure_date.strftime('%a %d, %b'),
             i_time=self.departure_date.strftime('%I:%M %p'),
             f_time=self.arrival_date.strftime('%I:%M %p'),
-)
+        )

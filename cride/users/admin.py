@@ -4,7 +4,7 @@
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib import admin
 
-#Models
+# Models
 from cride.users.models import Profile, User
 
 
@@ -23,5 +23,3 @@ class ProfileAdmin(admin.ModelAdmin):
 
 
 admin.site.register(User, UserAdmin)
-
-
