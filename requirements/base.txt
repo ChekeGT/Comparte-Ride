@@ -11,7 +11,7 @@ django==2.0.9
 django-environ==0.4.5
 
 # Django REST Framework
-djangorestframework==3.9.2
+djangorestframework==3.11.2
 django-filter==2.1.0
 
 # Json Web Tokens
